@@ -7,7 +7,7 @@ use App\Models\Category;
 use App\Models\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
@@ -15,203 +15,140 @@ class ArticleController extends Controller
     {
         $articles = Article::with(['category', 'media'])->latest()->get();
         $categories = Category::all();
+
         return view('article.index', compact('articles', 'categories'));
     }
 
     public function store(Request $request)
     {
-        \Log::info('=== START STORE METHOD ===');
-        \Log::info('Incoming fields: ' . json_encode($request->except(['_token', 'thumbnail', 'images'])));
-
-        try {
-            // Log MIME types untuk debug
-            if ($request->hasFile('thumbnail')) {
-                \Log::info('Thumbnail MIME: ' . $request->file('thumbnail')->getMimeType());
-            }
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $i => $file) {
-                    \Log::info("Image $i MIME: " . $file->getMimeType());
-                }
-            }
-
+        // ================= VALIDATION =================
         $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'content' => 'required',
-                'category_id' => 'required|exists:categories,id',
-                'thumbnail' => 'nullable|mimetypes:image/jpeg,image/png,image/jpg|max:5120',
-                'images' => 'nullable|array',
-                'images.*' => 'nullable|mimetypes:image/jpeg,image/png,image/jpg|max:5120',
-            ], [
-                'thumbnail.mimetypes' => 'Thumbnail harus berupa gambar jpeg/jpg/png',
-                'images.*.mimetypes' => 'Gambar tambahan hanya boleh berekstensi jpeg/jpg/png',
+            'title'        => 'required|string|max:255',
+            'content'      => 'required',
+            'category_id'  => 'required|exists:categories,id',
+            'thumbnail'    => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg|max:2048',
+            'images'       => 'nullable|array|max:5',
+            'images.*'     => 'file|mimetypes:image/jpeg,image/png,image/jpg|max:2048',
+            'published_at' => 'nullable|date',
+        ]);
+
+        // ================= CREATE ARTICLE =================
+        $article = Article::create([
+            'title'        => $validated['title'],
+            'content'      => $validated['content'],
+            'category_id'  => $validated['category_id'],
+            'published_at' => $validated['published_at'] ?? null,
+            'user_id'      => Auth::id(),
+        ]);
+
+        // ================= THUMBNAIL =================
+        if ($request->hasFile('thumbnail')) {
+            $thumbPath = $request->file('thumbnail')
+                ->store('articles/thumbnails', 'public');
+
+            $article->update([
+                'thumbnail' => $thumbPath,
             ]);
-
-            \Log::info('Validated data: ' . json_encode($validated));
-
-            $imagePath = public_path('images');
-            if (!File::exists($imagePath)) {
-                File::makeDirectory($imagePath, 0755, true);
-            }
-
-            // Simpan article tanpa media dulu
-            $data = [
-                'title' => $validated['title'],
-                'content' => $validated['content'],
-                'category_id' => $validated['category_id'],
-                'published_at' => $validated['published_at'] ?? null,
-                'user_id' => Auth::id(),
-            ];
-
-            if ($request->hasFile('thumbnail')) {
-                $thumbnail = $request->file('thumbnail');
-                $thumbnailName = 'thumb_' . time() . '_' . $thumbnail->getClientOriginalName();
-                $thumbnail->move($imagePath, $thumbnailName);
-                $data['thumbnail'] = 'images/' . $thumbnailName;
-
-                \Log::info('Thumbnail saved: ' . $thumbnailName);
-            }
-
-            $article = Article::create($data);
-            \Log::info('Article created with ID: ' . $article->id);
-
-            // Gambar tambahan masuk ke tabel media
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $index => $image) {
-                    if ($image && $image->isValid()) {
-                        $imageName = 'img_' . time() . '_' . $index . '_' . $image->getClientOriginalName();
-                        $image->move($imagePath, $imageName);
-
-                        Media::create([
-                            'article_id' => $article->id,
-                            'type' => 'gallery',
-                            'images' => $imageName,
-                        ]);
-
-                        \Log::info("Gallery image saved: $imageName");
-                    }
-                }
-            }
-
-            return redirect()->route('articles.index')->with('success', 'Artikel berhasil ditambahkan!');
         }
 
-        // Tangkap error validasi
-        catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('VALIDATION FAILED:', $e->errors());
-            return back()->withInput()->withErrors($e->errors());
+        // ================= GALLERY =================
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('articles/gallery', 'public');
+
+                Media::create([
+                    'article_id' => $article->id,
+                    'type'       => 'gallery',
+                    'images'     => $path,
+                ]);
+            }
         }
 
-        // Tangkap error lain
-        catch (\Exception $e) {
-            \Log::error('STORE ERROR: ' . $e->getMessage());
-            return back()->with('error', 'Gagal simpan: ' . $e->getMessage());
-        }
+        return redirect()
+            ->route('articles.index')
+            ->with('success', 'Artikel berhasil ditambahkan!');
     }
 
     public function update(Request $request, Article $article)
     {
-        \Log::info('=== START UPDATE METHOD ===');
-        \Log::info('Incoming update fields: ' . json_encode($request->except(['_token', '_method'])));
-
-        if ($request->hasFile('thumbnail')) {
-            \Log::info('Update Thumbnail MIME: ' . $request->file('thumbnail')->getMimeType());
-        }
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $i => $img) {
-                \Log::info("Update Image $i MIME: " . $img->getMimeType());
-            }
-        }
-
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'thumbnail' => ['nullable', 'file', function ($attribute, $value, $fail) use ($request) {
-                if ($request->hasFile('thumbnail') && !$request->file('thumbnail')->isValid()) {
-                    $fail('Thumbnail tidak valid.');
-                }
-            }, 'mimes:jpeg,jpg,png', 'max:5120'],
-            'images' => 'nullable|array',
-            'images.*' => ['nullable', 'file', function ($attribute, $value, $fail) {
-                if ($value instanceof \Illuminate\Http\UploadedFile && !$value->isValid()) {
-                    $fail('Setiap gambar tambahan harus berupa file gambar yang valid.');
-                }
-            }, 'mimes:jpeg,jpg,png', 'max:5120'],
+        // ================= VALIDATION =================
+        $validated = $request->validate([
+            'title'        => 'required|string|max:255',
+            'content'      => 'required',
+            'category_id'  => 'required|exists:categories,id',
+            'thumbnail'    => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg|max:2048',
+            'images'       => 'nullable|array|max:5',
+            'images.*'     => 'file|mimetypes:image/jpeg,image/png,image/jpg|max:2048',
             'published_at' => 'nullable|date',
         ]);
 
-        $data = $request->only('title', 'content', 'category_id', 'published_at');
+        // ================= UPDATE ARTICLE =================
+        $article->update([
+            'title'        => $validated['title'],
+            'content'      => $validated['content'],
+            'category_id'  => $validated['category_id'],
+            'published_at' => $validated['published_at'] ?? null,
+        ]);
 
-        $imagePath = public_path('images');
-        if (!File::exists($imagePath)) {
-            File::makeDirectory($imagePath, 0755, true);
-        }
-
+        // ================= UPDATE THUMBNAIL =================
         if ($request->hasFile('thumbnail')) {
-            if ($article->thumbnail && file_exists(public_path($article->thumbnail))) {
-                unlink(public_path($article->thumbnail));
+
+
+            if ($article->thumbnail) {
+                Storage::disk('public')->delete($article->thumbnail);
             }
 
-            $file = $request->file('thumbnail');
-            $filename = 'thumb_' . uniqid() . '_' . $file->getClientOriginalName();
-            $file->move($imagePath, $filename);
-            $data['thumbnail'] = 'images/' . $filename;
+            $thumbPath = $request->file('thumbnail')
+                ->store('articles/thumbnails', 'public');
 
-            Media::updateOrCreate(
-                ['article_id' => $article->id, 'type' => 'thumbnail'],
-                ['images' => $filename]
-            );
-
-            \Log::info("Thumbnail updated: $filename");
+            $article->update([
+                'thumbnail' => $thumbPath,
+            ]);
         }
+
+        // ================= UPDATE GALLERY (REPLACE) =================
         if ($request->hasFile('images')) {
-            $oldGallery = Media::where('article_id', $article->id)->where('type', 'gallery')->get();
+
+            $oldGallery = Media::where('article_id', $article->id)
+                ->where('type', 'gallery')
+                ->get();
+
             foreach ($oldGallery as $media) {
-                $oldPath = public_path('images/' . $media->images);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
+                Storage::disk('public')->delete($media->images);
                 $media->delete();
             }
-            foreach ($request->file('images') as $index => $img) {
-                if ($img->isValid()) {
-                    $imgName = 'img_' . uniqid() . '_' . $img->getClientOriginalName();
-                    $img->move($imagePath, $imgName);
 
-                    Media::create([
-                        'article_id' => $article->id,
-                        'type' => 'gallery',
-                        'images' => $imgName,
-                    ]);
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('articles/gallery', 'public');
 
-                    \Log::info("Gallery image replaced with: $imgName");
-                }
+                Media::create([
+                    'article_id' => $article->id,
+                    'type'       => 'gallery',
+                    'images'     => $path,
+                ]);
             }
         }
 
-
-        $article->update($data);
-
-        return redirect()->route('articles.index')->with('success', 'Artikel berhasil diperbarui.');
+        return redirect()
+            ->route('articles.index')
+            ->with('success', 'Artikel berhasil diperbarui!');
     }
 
     public function destroy(Article $article)
     {
-        if ($article->thumbnail && file_exists(public_path($article->thumbnail))) {
-            unlink(public_path($article->thumbnail));
+        if ($article->thumbnail) {
+            Storage::disk('public')->delete($article->thumbnail);
         }
 
         foreach ($article->media as $media) {
-            $filePath = public_path('images/' . $media->images);
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
+            Storage::disk('public')->delete($media->images);
             $media->delete();
         }
 
         $article->delete();
 
-        return redirect()->route('articles.index')->with('success', 'Artikel berhasil dihapus.');
+        return redirect()
+            ->route('articles.index')
+            ->with('success', 'Artikel berhasil dihapus!');
     }
-
 }

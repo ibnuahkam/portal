@@ -3,6 +3,28 @@
 @section('title', 'Artikel')
 
 @section('content')
+    <style>
+        /* IMAGE DI TABLE */
+        .table-image {
+            width: 90px;
+            height: 60px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .table-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+        }
+
+        /* GALLERY LEBIH KECIL */
+        .table-image.gallery {
+            width: 70px;
+            height: 50px;
+        }
+    </style>
+
 
     {{-- PAGE HEADER --}}
     <div class="page-header d-flex align-items-center justify-content-between mb-4">
@@ -50,20 +72,28 @@
                                 <td class="fw-semibold">{{ $article->title }}</td>
                                 <td>{{ $article->category->name ?? '-' }}</td>
 
-                                <td>
+                                <td class="text-center">
                                     @if ($article->thumbnail)
-                                        <img src="{{ asset($article->thumbnail) }}" class="img-thumbnail"
-                                            style="width:70px;height:45px;object-fit:cover">
+                                        <a href="{{ asset('storage/' . $article->thumbnail) }}" target="_blank"
+                                            class="d-inline-block">
+                                            <img src="{{ asset('storage/' . $article->thumbnail) }}"
+                                                class="img-thumbnail table-image">
+                                        </a>
                                     @else
                                         -
                                     @endif
                                 </td>
 
                                 <td>
-                                    @foreach ($article->media->where('type', 'gallery')->take(3) as $media)
-                                        <img src="{{ asset('images/' . $media->images) }}" class="img-thumbnail me-1 mb-1"
-                                            style="width:50px;height:35px;object-fit:cover">
-                                    @endforeach
+                                    <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                        @foreach ($article->media->where('type', 'gallery')->take(3) as $media)
+                                            <a href="{{ asset('storage/' . $media->images) }}" target="_blank"
+                                                class="d-inline-block">
+                                                <img src="{{ asset('storage/' . $media->images) }}"
+                                                    class="img-thumbnail table-image">
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 </td>
 
                                 <td class="text-center">
@@ -131,8 +161,9 @@
 
                                                         <div class="mt-2">
                                                             <img class="img-thumbnail thumbnail-preview"
-                                                                src="{{ $article->thumbnail ? asset($article->thumbnail) : '' }}"
+                                                                src="{{ $article->thumbnail ? asset('storage/' . $article->thumbnail) : '' }}"
                                                                 style="width:120px;height:80px;object-fit:cover;{{ $article->thumbnail ? '' : 'display:none' }}">
+
                                                         </div>
                                                     </div>
 
@@ -144,10 +175,11 @@
 
                                                         <div class="mt-2 d-flex flex-wrap gap-2 gallery-preview">
                                                             @foreach ($article->media->where('type', 'gallery') as $media)
-                                                                <img src="{{ asset('images/' . $media->images) }}"
+                                                                <img src="{{ asset('storage/' . $media->images) }}"
                                                                     class="img-thumbnail"
                                                                     style="width:80px;height:60px;object-fit:cover">
                                                             @endforeach
+
                                                         </div>
                                                     </div>
 
