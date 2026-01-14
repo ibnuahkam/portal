@@ -76,7 +76,7 @@
                                     @if ($article->thumbnail)
                                         <a href="{{ asset('storage/' . $article->thumbnail) }}" target="_blank"
                                             class="d-inline-block">
-                                            <img src="{{ asset('storage/' . $article->thumbnail) }}"
+                                            <img src="{{ asset('storage/app/public/' . $article->thumbnail) }}"
                                                 class="img-thumbnail table-image">
                                         </a>
                                     @else
@@ -87,10 +87,10 @@
                                 <td>
                                     <div class="d-flex flex-wrap gap-1 justify-content-center">
                                         @foreach ($article->media->where('type', 'gallery')->take(3) as $media)
-                                            <a href="{{ asset('storage/' . $media->images) }}" target="_blank"
+                                            <a href="{{ asset('storage/app/public/' . $media->images) }}" target="_blank"
                                                 class="d-inline-block">
-                                                <img src="{{ asset('storage/' . $media->images) }}"
-                                                    class="img-thumbnail table-image">
+                                                <img src="{{ asset('storage/app/public/' . $media->images) }}"
+                                                    class="img-thumbnail table-image gallery">
                                             </a>
                                         @endforeach
                                     </div>
@@ -161,7 +161,7 @@
 
                                                         <div class="mt-2">
                                                             <img class="img-thumbnail thumbnail-preview"
-                                                                src="{{ $article->thumbnail ? asset('storage/' . $article->thumbnail) : '' }}"
+                                                                src="{{ $article->thumbnail ? asset('storage/app/public/' . $article->thumbnail) : '' }}"
                                                                 style="width:120px;height:80px;object-fit:cover;{{ $article->thumbnail ? '' : 'display:none' }}">
 
                                                         </div>
@@ -175,7 +175,7 @@
 
                                                         <div class="mt-2 d-flex flex-wrap gap-2 gallery-preview">
                                                             @foreach ($article->media->where('type', 'gallery') as $media)
-                                                                <img src="{{ asset('storage/' . $media->images) }}"
+                                                                <img src="{{ asset('storage/app/public/' . $media->images) }}"
                                                                     class="img-thumbnail"
                                                                     style="width:80px;height:60px;object-fit:cover">
                                                             @endforeach
