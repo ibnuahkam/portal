@@ -1,208 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Superdigitech Portal</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Superdigitech Portal</title>
 
-    * {
-      box-sizing: border-box;
-    }
+    <link rel="icon" href="https://superdigitech.com/static/media/logo.8546d407f4d0a55db47d.jpeg"
+        type="image/x-icon" />
 
-    body, html {
-      margin: 0; padding: 0; height: 100%;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-    .login-wrapper {
-      background: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      width: 420px;
-      padding: 50px 40px;
-      color: #fff;
-      box-sizing: border-box;
-      text-align: center;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    .login-header {
-      font-weight: 700;
-      font-size: 29px;
-      margin-bottom: 30px;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1E293B, #0F172A);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      text-align: left;
-      font-size: 1rem;
-      color: #eee;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
+        /* === MAIN CARD === */
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 1040px;
+            height: 600px;
+            background: rgba(255, 255, 255, .15);
+            backdrop-filter: blur(12px);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+        }
 
-    input[type=email], input[type=password] {
-      width: 100%;
-      padding: 15px 18px;
-      margin-bottom: 25px;
-      border: none;
-      border-radius: 12px;
-      font-size: 1rem;
-      outline: none;
-      background: rgba(255, 255, 255, 0.3);
-      color: #222;
-      box-shadow: inset 2px 2px 6px rgba(255, 255, 255, 0.7),
-                  inset -2px -2px 6px rgba(0, 0, 0, 0.15);
-      transition: background 0.3s ease;
-    }
-    input[type=email]::placeholder,
-    input[type=password]::placeholder {
-      color: #666;
-      font-style: italic;
-    }
-    input[type=email]:focus,
-    input[type=password]:focus {
-      background: #fff;
-      box-shadow: 0 0 8px 2px #764ba2;
-      color: #000;
-    }
+        /* === LEFT SIDE === */
+        .login-left {
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(15, 23, 42, .85), rgba(30, 41, 59, .85)),
+                url("https://images.unsplash.com/photo-1526378722445-98a9e2b9b07e?auto=format&fit=crop&w=900&q=80") center / cover no-repeat;
+            color: #fff;
+            padding: 40px;
+        }
 
-    .form-check {
-      display: flex;
-      align-items: center;
-      margin-bottom: 30px;
-      gap: 12px;
-      justify-content: flex-start;
-      color: #ddd;
-      font-weight: 500;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    .form-check input[type=checkbox] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: #764ba2;
-      border-radius: 4px;
-      border: 1px solid #fff;
-      box-shadow: 0 0 2px #764ba2;
-      transition: box-shadow 0.3s ease;
-    }
-    .form-check input[type=checkbox]:focus {
-      box-shadow: 0 0 6px 2px #764ba2;
-      outline: none;
-    }
+        .login-left::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .2), rgba(0, 0, 0, .55));
+        }
 
-    button[type=submit] {
-      width: 100%;
-      padding: 16px;
-      border: none;
-      border-radius: 14px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: white;
-      background: linear-gradient(135deg, #764ba2, #667eea);
-      cursor: pointer;
-      box-shadow: 0 8px 20px rgba(118, 75, 162, 0.8);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    button[type=submit]:hover {
-      background: linear-gradient(135deg, #5a2a83, #5465d1);
-      box-shadow: 0 10px 25px rgba(90, 42, 131, 0.9);
-    }
+        .login-left-content {
+            position: relative;
+            z-index: 2;
+        }
 
-    .forgot-password {
-      margin-top: 20px;
-      text-align: right;
-      font-size: 0.9rem;
-      color: #ddd;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    .forgot-password a {
-      color: #f5e9ff;
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    .forgot-password a:hover {
-      color: #c3afff;
-      text-decoration: underline;
-    }
+        .login-left h2 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
 
-    .invalid-feedback {
-      font-size: 0.85rem;
-      color: #ff6b6b;
-      margin-top: -18px;
-      margin-bottom: 20px;
-      text-align: left;
-      text-shadow: none;
-    }
-  </style>
+        .login-left p {
+            font-size: 15px;
+            line-height: 1.6;
+            opacity: .9;
+        }
+
+        /* === RIGHT SIDE === */
+        .login-right {
+            padding: 50px 45px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* LOGO */
+        .login-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .login-logo img {
+            width: 85px;
+            height: auto;
+            background: #fff;
+            padding: 8px;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .4);
+        }
+
+        .login-header {
+            font-size: 26px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            font-size: 14px;
+            opacity: .7;
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            background: rgba(255, 255, 255, .9);
+            font-size: 14px;
+        }
+
+        button {
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            background: linear-gradient(135deg, #2563EB, #3B82F6);
+            cursor: pointer;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, .6);
+        }
+
+        .invalid-feedback {
+            font-size: 12px;
+            color: #ff9a9a;
+            margin-bottom: 6px;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 900px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                width: 95%;
+                height: auto;
+            }
+
+            .login-left {
+                display: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="login-wrapper" role="main">
-    <h1 class="login-header">Superdigitech Portal</h1>
 
-    <form method="POST" action="{{ route('login') }}" novalidate>
-      @csrf
+    <div class="login-container">
 
-      <label for="email">{{ __('E-Mail Address') }}</label>
-      <input
-        id="email"
-        type="email"
-        name="email"
-        required
-        autofocus
-        placeholder="your.email@example.com"
-        class="@error('email') is-invalid @enderror"
-      />
-      @error('email')
-        <div class="invalid-feedback">{{ $message }}</div>
-      @enderror
-
-      <label for="password">{{ __('Password') }}</label>
-      <input
-        id="password"
-        type="password"
-        name="password"
-        required
-        autocomplete="current-password"
-        placeholder="Enter your password"
-        class="@error('password') is-invalid @enderror"
-      />
-      @error('password')
-        <div class="invalid-feedback">{{ $message }}</div>
-      @enderror
-
-      <div class="form-check">
-        <input
-          type="checkbox"
-          name="remember"
-          id="remember"
-          {{ old('remember') ? 'checked' : '' }}
-        />
-        <label for="remember">{{ __('Remember Me') }}</label>
-      </div>
-
-      <button type="submit">{{ __('Login') }}</button>
-
-      @if (Route::has('password.request'))
-        <div class="forgot-password">
-          <a href="{{ route('password.request') }}">{{ __('Forgot Your Password?') }}</a>
+        <!-- LEFT -->
+        <div class="login-left">
+            <div class="login-left-content">
+                <h2>Welcome Back 👋</h2>
+                <p>
+                    Superdigitech Portal membantu kamu mengelola konten,
+                    kategori, dan artikel dengan cepat dan aman.
+                </p>
+            </div>
         </div>
-      @endif
-    </form>
-  </div>
+
+        <!-- RIGHT -->
+        <div class="login-right">
+
+            <!-- LOGO -->
+            <div class="login-logo">
+                <img src="https://superdigitech.com/static/media/logo.8546d407f4d0a55db47d.jpeg"
+                    alt="Superdigitech Logo">
+            </div>
+
+            <h1 class="login-header">Superdigitech Portal</h1>
+            <p class="login-subtitle">Sign in to continue</p>
+
+            <form id="loginForm">
+                @csrf
+
+                <label>Email</label>
+                <input type="email" name="email" id="email">
+                <div class="invalid-feedback" id="email-error"></div>
+
+                <label>Password</label>
+                <input type="password" name="password" id="password">
+                <div class="invalid-feedback" id="password-error"></div>
+
+                <button type="submit">Sign In</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            document.getElementById('email-error').innerText = '';
+            document.getElementById('password-error').innerText = '';
+
+            const formData = new FormData(this);
+
+            const response = await fetch("{{ url('/login') }}", {
+                method: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.status === 422) {
+                if (data.errors?.email)
+                    document.getElementById('email-error').innerText = data.errors.email[0];
+                if (data.errors?.password)
+                    document.getElementById('password-error').innerText = data.errors.password[0];
+                return;
+            }
+
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                alert(data.message);
+            }
+        });
+    </script>
+
 </body>
+
 </html>
