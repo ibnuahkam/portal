@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>@yield('title', 'Portal Admin')</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="https://superdigitech.com/static/media/logo.8546d407f4d0a55db47d.jpeg" type="image/x-icon" />
+    <link rel="icon" href="https://superdigitech.com/static/media/logo.8546d407f4d0a55db47d.jpeg"
+        type="image/x-icon" />
 
     <!-- Fonts and icons -->
     <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
         WebFont.load({
-            google: { families: ["Public Sans:300,400,500,600,700"] },
+            google: {
+                families: ["Public Sans:300,400,500,600,700"]
+            },
             custom: {
-                families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+                families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands",
+                    "simple-line-icons"
+                ],
                 urls: ["{{ asset('assets/css/fonts.min.css') }}"],
             },
-            active: function () {
+            active: function() {
                 sessionStorage.fonts = true;
             },
         });
@@ -28,6 +34,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 </head>
+
 <body>
     <div class="wrapper">
         @include('layouts.nav')
@@ -57,7 +64,20 @@
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
     <script src="{{ asset('assets/js/setting-demo.js') }}"></script>
     <script src="{{ asset('assets/js/demo.js') }}"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: "{{ session('success') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+    @endif
+
 </body>
+
 </html>

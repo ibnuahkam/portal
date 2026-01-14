@@ -24,11 +24,21 @@ class CategoriesController extends Controller
             'name' => 'required|string|max:255'
         ]);
 
-        Category::create([
-            'name' => $request->name
-        ]);
+        try {
+            Category::create([
+                'name' => $request->name
+            ]);
 
-        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
+            return redirect()
+                ->route('categories.index')
+                ->with('success', 'Kategori berhasil ditambahkan');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan kategori');
+        }
     }
 
     public function edit(Category $category)
